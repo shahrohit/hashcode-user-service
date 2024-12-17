@@ -11,12 +11,14 @@ import {
   TRegisterUser,
   TVerifyOtp,
 } from "@schemas/auth-schema";
+
 import authService from "@services/auth-service";
+import authRepository from "@repositories/auth-repository";
+
 import { CREATED } from "@utils/strings";
-import generateOTP from "@/utils/generate-otp";
-import sendEmailVerificationOTP from "@/utils/send-email-otp";
-import { BadRequest, Conflict, Forbidden } from "@/utils/errors";
-import authRepository from "@/repositories/auth-repository";
+import generateOTP, { generateExpiryTime } from "@utils/generate-otp";
+import sendEmailVerificationOTP from "@utils/send-email-otp";
+import { BadRequest, Conflict, Forbidden } from "@utils/errors";
 
 const map: {
   [name: string]: {
@@ -57,11 +59,11 @@ const sendOTP = async (req: Req, res: Res, next: NextFn) => {
     }
 
     const otp = generateOTP();
-    const otpExpires = Date.now() + 5 * 60 * 1000;
+    const otpExpires = generateExpiryTime(5);
 
     map[body.email] = { body, otp, otpExpires };
 
-    sendEmailVerificationOTP(body.email, otp);
+    sendEmailVerificationOTP(body.email, body.name, otp);
 
     res.status(StatusCodes.OK).json({
       succcess: true,
@@ -75,19 +77,17 @@ const sendOTP = async (req: Req, res: Res, next: NextFn) => {
     next(error);
   }
 };
-const register = async (req: Req, res: Res, next: NextFn) => {
+const verifyOTPAndRegister = async (req: Req, res: Res, next: NextFn) => {
   try {
     const { email, otp } = req.body as TVerifyOtp;
-    if (!map[email]) throw new BadRequest("Invalid Email provided");
+    if (!map[email]) throw new Forbidden("Invalid Email provided");
 
     const body = map[email].body;
     const storedOtp = map[email].otp;
     const otpExpires = map[email].otpExpires;
 
+    if (otpExpires < Date.now()) throw new Forbidden("OTP Expire");
     if (otp !== storedOtp) throw new BadRequest("Invalid OTP");
-    if (otpExpires < Date.now()) {
-      throw new BadRequest("OTP Expire");
-    }
 
     delete map[email];
 
@@ -119,12 +119,30 @@ const login = async (req: Req, res: Res, next: NextFn) => {
     next(error);
   }
 };
+const getUserByUsername = async (req: Req, res: Res, next: NextFn) => {
+  try {
+    const { username } = req.params as { username: string | undefined };
+    if (!username) throw new BadRequest("Invalid User");
+
+    const response = await authRepository.getUserByUsername(username);
+
+    res.status(StatusCodes.OK).json({
+      succcess: true,
+      statusCode: StatusCodes.OK,
+      message: "Logged In",
+      data: response,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const authController = {
-  register,
+  verifyOTPAndRegister,
   login,
   registerOAuthUser,
   sendOTP,
+  getUserByUsername,
 };
 
 export default authController;

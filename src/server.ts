@@ -2,8 +2,8 @@ import express from "express";
 import bodyParser from "body-parser";
 
 import { PORT } from "@config/server-config";
+import errorHandler from "@middlewares/error-handler";
 import apiRouter from "@routes/index";
-import errorHandler from "@middlewares/errorHandler";
 
 const app = express();
 

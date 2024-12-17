@@ -14,7 +14,6 @@ model User {
     email             String    @unique
     password          String
     avatar            String?
-    country           String?
     createdAt         DateTime  @default(now())
     updatedAt         DateTime  @updatedAt
 

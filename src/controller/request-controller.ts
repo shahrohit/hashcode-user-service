@@ -1,11 +1,10 @@
+import axios from "axios";
+import { StatusCodes } from "http-status-codes";
 import {
   NextFunction as NextFn,
   Request as Req,
   Response as Res,
 } from "express";
-import axios from "axios";
-
-import { StatusCodes } from "http-status-codes";
 
 const requestController =
   (SERVICE_URL: string) => async (req: Req, res: Res, next: NextFn) => {

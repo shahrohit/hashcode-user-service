@@ -26,7 +26,7 @@ const validate =
         success: false,
         statusCode: StatusCodes.BAD_REQUEST,
         name: "BadRequest",
-        message: "Invalid Data Provided",
+        message: err.length == 0 ? "Invalid Data Provided" : err[0],
         error: err,
       });
     }
