@@ -136,6 +136,23 @@ const getUserByUsername = async (req: Req, res: Res, next: NextFn) => {
     next(error);
   }
 };
+const getUserIdByUsername = async (req: Req, res: Res, next: NextFn) => {
+  try {
+    const { username } = req.params as { username: string | undefined };
+    if (!username) throw new BadRequest("Invalid User");
+
+    const response = await authRepository.getUserIdByUsername(username);
+
+    res.status(StatusCodes.OK).json({
+      succcess: true,
+      statusCode: StatusCodes.OK,
+      message: "Logged In",
+      data: response,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const authController = {
   verifyOTPAndRegister,
@@ -143,6 +160,7 @@ const authController = {
   registerOAuthUser,
   sendOTP,
   getUserByUsername,
+  getUserIdByUsername,
 };
 
 export default authController;

@@ -10,6 +10,7 @@ const userRouter = express.Router();
 userRouter.use("/topics", topicRouter);
 userRouter.use("/languages", languageRouter);
 userRouter.use("/problems", problemRouter);
+userRouter.get("/id/:username", authController.getUserIdByUsername);
 userRouter.get("/:username", authController.getUserByUsername);
 
 export default userRouter;

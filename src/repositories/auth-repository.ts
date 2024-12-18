@@ -91,6 +91,15 @@ const getUserByUsername = async (username: string) => {
   if (!user) throw new NotFound("User Not Found");
   return user;
 };
+const getUserIdByUsername = async (username: string) => {
+  const user = await prisma.user.findUnique({
+    where: { username },
+    select: {
+      id: true,
+    },
+  });
+  return user;
+};
 
 const authRepository = {
   register,
@@ -98,6 +107,7 @@ const authRepository = {
   registerOAuthUser,
   getUser,
   getUserByUsername,
+  getUserIdByUsername,
 };
 
 export default authRepository;
